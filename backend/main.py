@@ -9,6 +9,8 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -44,6 +46,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+    lumina_dir = STATIC_DIR / "lumina-video"
+    if lumina_dir.exists():
+        app.mount("/lumina-video", StaticFiles(directory=str(lumina_dir)), name="lumina-video")
 
 MODEL = "liquid/lfm-2.5-2.6b:free"
 
@@ -93,10 +102,20 @@ class ChatMessageResponse(BaseModel):
         from_attributes = True
 
 
-# ==================== ROTAS DE STATUS ====================
+# ==================== ROTA DO FRONTEND & STATUS ====================
 
-@app.get("/")
-def read_root():
+@app.get("/", response_class=FileResponse)
+def render_frontend():
+    """Renderiza a aplicação frontend Lumina Chat diretamente na raiz"""
+    index_file = STATIC_DIR / "index.html"
+    if not index_file.exists():
+        raise HTTPException(status_code=404, detail="Frontend (static/index.html) não encontrado")
+    return FileResponse(str(index_file))
+
+
+@app.get("/api/health")
+def api_health():
+    """Endpoint de verificação de status da API e banco de dados"""
     return {
         "status": "ok",
         "message": "Lumina API ativa",

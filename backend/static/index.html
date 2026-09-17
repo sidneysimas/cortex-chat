@@ -707,8 +707,12 @@
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     // State management
+    const defaultOrigin = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) 
+      ? window.location.origin 
+      : 'http://127.0.0.1:8001';
+
     const state = {
-      backendUrl: localStorage.getItem('lumina_backend_url') || 'http://127.0.0.1:8001',
+      backendUrl: localStorage.getItem('lumina_backend_url') || defaultOrigin,
       authToken: localStorage.getItem('lumina_auth_token') || null,
       currentUser: null,
       authMode: 'login', // 'login' ou 'register'
@@ -787,7 +791,7 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-        const res = await fetch(`${state.backendUrl}/`, {
+        const res = await fetch(`${state.backendUrl}/api/health`, {
           method: 'GET',
           signal: controller.signal
         });
