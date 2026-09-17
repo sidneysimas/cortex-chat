@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumina Chat — Inteligência Criativa</title>
+
+  <!-- Google Fonts: Geist, Instrument Serif, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            serif: ['Instrument Serif', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Reset & Scrollbar */
+    * {
+      box-sizing: border-box;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(249, 115, 22, 0.4);
+    }
+
+    /* Font utilities */
+    .font-instrument-serif {
+      font-family: 'Instrument Serif', Georgia, serif !important;
+    }
+
+    /* Shared border-gradient mask helper (Lumina Design System signature) */
+    [style*="--border-gradient"] {
+      position: relative;
+    }
+    [style*="--border-gradient"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: var(--border-radius-before, inherit);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      background: var(--border-gradient);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Falling Beams Keyframes */
+    @keyframes beam-fall {
+      0% { transform: translateY(-100%); opacity: 0; }
+      5% { opacity: 0.6; }
+      50% { opacity: 1; }
+      95% { opacity: 0.6; }
+      100% { transform: translateY(120vh); opacity: 0; }
+    }
+    .animate-beam-1 { animation: beam-fall 6.5s linear infinite; animation-delay: 0s; }
+    .animate-beam-2 { animation: beam-fall 8.5s linear infinite; animation-delay: 2.2s; }
+    .animate-beam-3 { animation: beam-fall 7.2s linear infinite; animation-delay: 4.4s; }
+
+    /* Floating Particles for Custom Lumina Button */
+    @keyframes floating-points {
+      0% { transform: translateY(0); }
+      85% { opacity: 0; }
+      100% { transform: translateY(-48px); opacity: 0; }
+    }
+    .points_wrapper {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+    }
+    .points_wrapper .point {
+      bottom: -6px;
+      position: absolute;
+      animation: floating-points infinite ease-in-out;
+      pointer-events: none;
+      width: 2px;
+      height: 2px;
+      background-color: #fff;
+      border-radius: 9999px;
+    }
+    .points_wrapper .point:nth-child(1) { left: 12%; opacity: 1; animation-duration: 2.3s; animation-delay: 0.2s; }
+    .points_wrapper .point:nth-child(2) { left: 32%; opacity: 0.7; animation-duration: 2.6s; animation-delay: 0.5s; }
+    .points_wrapper .point:nth-child(3) { left: 24%; opacity: 0.8; animation-duration: 2.1s; animation-delay: 0.1s; }
+    .points_wrapper .point:nth-child(4) { left: 52%; opacity: 0.6; animation-duration: 1.9s; }
+    .points_wrapper .point:nth-child(5) { left: 70%; opacity: 0.9; animation-duration: 2.4s; animation-delay: 0.4s; }
+    .points_wrapper .point:nth-child(6) { left: 88%; opacity: 0.8; animation-duration: 2.2s; animation-delay: 0.2s; }
+
+    /* Custom Lumina Button */
+    .button-custom {
+      cursor: pointer;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 191, 36, 0.8) 0%, rgba(251, 191, 36, 0) 100%), linear-gradient(0deg, #ea580c, #ea580c);
+      border-radius: 9999px;
+      border: none;
+      box-shadow: 0 0 20px rgba(234, 88, 12, 0.35);
+    }
+    .button-custom::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      background: linear-gradient(177.95deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 9999px;
+      transition: all 0.3s ease-in-out;
+      z-index: 0;
+    }
+    .button-custom::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 191, 36, 0.8) 0%, rgba(251, 191, 36, 0) 100%), linear-gradient(0deg, #ea580c, #ea580c);
+      border-radius: 9999px;
+      transition: all 0.3s ease-in-out;
+      z-index: 0;
+    }
+    .button-custom:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 35px rgba(249, 115, 22, 0.55);
+    }
+    .button-custom:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .button-custom .inner {
+      z-index: 2;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Fade-Slide-In animation */
+    @keyframes fadeSlideIn {
+      0% { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+      100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+    }
+    .animate-fade-slide {
+      animation: fadeSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    /* Pulse glow */
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+    .animate-glow {
+      animation: glowPulse 5s ease-in-out infinite;
+    }
+
+    /* Shimmer animation for thinking */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .thinking-shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(249,115,22,0.18) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    /* Markdown prose styles inside bubbles */
+    .chat-prose {
+      color: #e5e5e5;
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      word-break: break-word;
+    }
+    .chat-prose p {
+      margin-bottom: 0.75rem;
+    }
+    .chat-prose p:last-child {
+      margin-bottom: 0;
+    }
+    .chat-prose pre {
+      background: #0d0d0d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.625rem;
+      padding: 0.875rem 1rem;
+      margin: 0.75rem 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+    }
+    .chat-prose code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(249, 115, 22, 0.12);
+      color: #fdba74;
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-size: 0.85em;
+    }
+    .chat-prose pre code {
+      background: transparent;
+      color: #f3f4f6;
+      padding: 0;
+      border-radius: 0;
+    }
+    .chat-prose ul, .chat-prose ol {
+      margin-left: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .chat-prose ul { list-style-type: disc; }
+    .chat-prose ol { list-style-type: decimal; }
+    .chat-prose li {
+      margin-bottom: 0.25rem;
+    }
+    .chat-prose strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .chat-prose h1, .chat-prose h2, .chat-prose h3 {
+      color: #ffffff;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body class="bg-[#050505] text-white font-sans antialiased overflow-hidden selection:bg-orange-500/30 selection:text-white h-screen w-screen flex flex-col">
+
+  <!-- ==================== BACKGROUND GRID & AMBIENT GLOW ==================== -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <!-- Ambient glowing orbs -->
+    <div class="absolute top-[-15%] left-[20%] w-[50vw] h-[50vw] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none animate-glow"></div>
+    <div class="absolute bottom-[-10%] right-[10%] w-[45vw] h-[45vw] bg-amber-500/8 blur-[160px] rounded-full pointer-events-none animate-glow" style="animation-delay: 2.5s;"></div>
+
+    <!-- Vertical grid with falling beams (Lumina Design System) -->
+    <div class="absolute inset-0 flex w-full max-w-7xl mx-auto border-r border-white/5 opacity-50">
+      <div class="flex-1 border-l border-white/5 h-full relative overflow-hidden">
+        <span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">01</span>
+      </div>
+      <div class="flex-1 border-l border-white/5 h-full relative overflow-hidden">
+        <div class="absolute top-0 -left-[1px] w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500/70 to-transparent animate-beam-1"></div>
+        <span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">02</span>
+      </div>
+      <div class="flex-1 border-l border-white/5 h-full flex justify-center relative overflow-hidden">
+        <div class="absolute top-0 -left-[1px] w-[1px] h-96 bg-gradient-to-b from-transparent via-orange-500/90 to-transparent animate-beam-2"></div>
+        <div class="h-full border-r border-dashed border-orange-500/20 w-px"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500 to-transparent animate-beam-1" style="animation-delay: 1.5s;"></div>
+        <span class="absolute bottom-8 text-orange-500/30 text-xs font-mono">03</span>
+      </div>
+      <div class="flex-1 border-l border-white/5 h-full relative overflow-hidden">
+        <div class="absolute top-0 -left-[1px] w-[1px] h-48 bg-gradient-to-b from-transparent via-orange-500/70 to-transparent animate-beam-3"></div>
+        <span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">04</span>
+      </div>
+      <div class="flex-1 border-l border-white/5 h-full relative overflow-hidden">
+        <span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">05</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== AUTH SCREEN (LOGIN / CADASTRO OBRIGATÓRIO) ==================== -->
+  <div id="auth-screen" class="relative z-20 flex flex-col items-center justify-center min-h-screen w-full px-4 py-8 overflow-y-auto">
+    
+    <!-- Central Auth Card (Lumina Design System) -->
+    <div class="w-full max-w-sm rounded-2xl bg-neutral-950/90 backdrop-blur-2xl border border-white/10 p-7 shadow-2xl relative animate-fade-slide" style="--border-gradient: linear-gradient(180deg, rgba(249, 115, 22, 0.45), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
+      
+      <!-- Brand Header -->
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-12 h-12 rounded-full items-center justify-center shadow-[0_0_25px_rgba(249,115,22,0.5)] mb-3" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
+          <div class="w-3.5 h-3.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <h1 class="text-2xl font-bold tracking-tight text-white">Lumina</h1>
+          <span class="text-xs uppercase tracking-widest text-orange-400 font-mono font-bold">Chat 2.0</span>
+        </div>
+        <p class="text-xs text-neutral-400 leading-relaxed" id="auth-screen-subtitle">Acesse sua conta para conversar com a IA e salvar seu histórico no banco</p>
+      </div>
+
+      <!-- Tabs (Entrar / Cadastrar) -->
+      <div class="flex p-1 rounded-xl bg-white/5 border border-white/5 mb-4 text-xs font-medium">
+        <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-1.5 rounded-lg text-white bg-white/10 shadow-sm transition-all">Entrar</button>
+        <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white transition-all">Criar Conta</button>
+      </div>
+
+      <!-- Feedback Alert -->
+      <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border"></div>
+
+      <!-- Form -->
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-medium text-neutral-400 mb-1.5 uppercase tracking-wider" id="label-identifier">Usuário ou E-mail</label>
+          <input
+            type="text"
+            id="auth-identifier"
+            required
+            placeholder="Digite seu usuário ou e-mail"
+            class="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
+          />
+        </div>
+
+        <div id="group-email" class="hidden">
+          <label class="block text-[11px] font-medium text-neutral-400 mb-1.5 uppercase tracking-wider">E-mail</label>
+          <input
+            type="email"
+            id="auth-email"
+            placeholder="exemplo@lumina.ai"
+            class="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-neutral-400 mb-1.5 uppercase tracking-wider">Senha</label>
+          <input
+            type="password"
+            id="auth-password"
+            required
+            minlength="6"
+            placeholder="Mínimo de 6 caracteres"
+            class="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="btn-auth-submit"
+          class="button-custom w-full py-2.5 mt-2 text-xs font-semibold"
+        >
+          <div class="points_wrapper">
+            <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+          </div>
+          <span class="inner text-xs font-semibold" id="text-auth-submit">Entrar na Plataforma</span>
+        </button>
+      </form>
+
+      <!-- Bottom backend status info in login card -->
+      <div class="mt-5 pt-3.5 border-t border-white/5 flex items-center justify-between text-[11px] text-neutral-500">
+        <div class="flex items-center gap-1.5">
+          <span id="auth-status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+          <span id="auth-status-text">Conectando...</span>
+        </div>
+        <button onclick="toggleSettingsModal()" class="hover:text-neutral-300 transition-colors">Configurar Porta</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==================== APP SCREEN (CHAT WORKSPACE - PROTEGIDO) ==================== -->
+  <div id="app-screen" class="relative z-10 flex flex-col h-full w-full hidden">
+
+    <!-- ==================== TOP NAVIGATION HEADER ==================== -->
+    <header class="relative z-20 flex items-center justify-between px-5 md:px-8 py-3.5 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
+      <!-- Left: Brand / Logo -->
+      <div class="flex items-center gap-3">
+        <!-- Mobile sidebar toggle -->
+        <button id="btn-toggle-sidebar" class="md:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-neutral-300 hover:text-white transition-colors" title="Menu lateral">
+          <i data-lucide="menu" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Lumina Icon Dot Logo -->
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="startNewChat()">
+          <div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-8 h-8 rounded-full items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.4)]" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
+            <div class="w-2.5 h-2.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-lg font-semibold tracking-tight text-white">Lumina</span>
+            <span class="text-xs uppercase tracking-widest text-orange-400/90 font-mono font-bold">Chat 2.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Model Pill Badge -->
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-xs text-neutral-300" style="--border-gradient: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0)); --border-radius-before: 9999px;">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-orange-400"></i>
+        <span class="text-neutral-400">Modelo:</span>
+        <span class="font-mono text-white font-medium" id="current-model-name">liquid/lfm-2.5-2.6b:free</span>
+      </div>
+
+      <!-- Right: Backend Status & Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Live Status Pill -->
+        <div id="backend-status-pill" class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs transition-all duration-300" title="Status da API Backend">
+          <span id="status-indicator-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+          <span id="status-indicator-text" class="text-neutral-400 font-medium hidden sm:inline">Conectando...</span>
+        </div>
+
+        <!-- Settings / Config Button -->
+        <button onclick="toggleSettingsModal()" class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-neutral-400 hover:text-white transition-colors" title="Configurações">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- User Profile Pill with dropdown -->
+        <div id="user-profile-pill" class="relative">
+          <button onclick="toggleUserDropdown()" class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 hover:border-orange-500/40 text-xs text-white transition-all">
+            <div class="w-5 h-5 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-[10px] font-bold text-black shadow-sm" id="user-avatar-char">U</div>
+            <span class="font-medium max-w-[100px] truncate" id="user-display-username">Usuário</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-neutral-400"></i>
+          </button>
+          <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-neutral-950/95 backdrop-blur-xl border border-white/10 shadow-2xl p-2 z-50 text-xs animate-fade-slide">
+            <div class="px-2.5 py-2 border-b border-white/5 text-neutral-400">
+              <div class="text-[9px] uppercase tracking-wider text-orange-400 font-bold">Conectado como</div>
+              <div class="text-white font-medium truncate mt-0.5" id="user-dropdown-email">user@email.com</div>
+            </div>
+            <button onclick="handleLogout()" class="w-full text-left px-2.5 py-2 mt-1 rounded-lg text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Desconectar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- New Chat Button (Desktop) -->
+        <button onclick="startNewChat()" class="button-custom scale-90 hidden md:inline-flex" type="button">
+          <div class="points_wrapper">
+            <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+          </div>
+          <span class="inner px-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Novo Chat</span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <div class="relative z-10 flex flex-1 overflow-hidden">
+
+    <!-- ==================== SIDEBAR (SESSIONS) ==================== -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 bg-[#0a0a0a]/95 md:bg-[#070707]/60 backdrop-blur-xl border-r border-white/5 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0 pt-16 md:pt-0">
+      <!-- Sidebar Header -->
+      <div class="p-4 border-b border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="message-square" class="w-4 h-4 text-orange-400"></i>
+          <span class="text-xs font-semibold tracking-widest uppercase text-neutral-400">Conversas</span>
+        </div>
+        <button onclick="startNewChat()" class="p-1.5 rounded-md hover:bg-white/10 text-neutral-400 hover:text-white transition-colors" title="Nova Conversa">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Chat History List -->
+      <div id="chat-history-list" class="flex-1 overflow-y-auto p-3 space-y-1">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3.5 border-t border-white/5 bg-black/20 flex flex-col gap-2">
+        <div class="flex items-center justify-between text-[11px] text-neutral-500 px-1">
+          <span>Backend: <code class="text-orange-400/90 font-mono">:8001</code></span>
+          <button onclick="clearAllChats()" class="hover:text-red-400 transition-colors" title="Limpar todas as conversas">Limpar Tudo</button>
+        </div>
+        <div class="text-[10px] text-neutral-600 text-center tracking-wide uppercase">
+          Lumina Creative Engine © 2026
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- ==================== CHAT VIEWPORT ==================== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+      <!-- Messages Scroll Area -->
+      <div id="messages-container" class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6 scroll-smooth">
+        
+        <!-- Welcome Hero (shown when no messages yet) -->
+        <div id="welcome-hero" class="max-w-3xl mx-auto pt-8 pb-12 flex flex-col items-center text-center animate-fade-slide">
+          
+          <!-- Badge -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-orange-400 text-xs font-semibold tracking-widest uppercase mb-6" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
+            <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
+            <span>Motor Conversacional 2.0</span>
+          </div>
+
+          <!-- Hero Title -->
+          <h1 class="text-4xl md:text-6xl font-medium tracking-tight text-white mb-4 leading-[1.05]">
+            Converse com a
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-white font-instrument-serif italic">Lumina AI</span>
+          </h1>
+
+          <!-- Subtitle -->
+          <p class="text-base md:text-lg text-neutral-400 max-w-xl mb-10 leading-relaxed">
+            Assistente inteligente integrado via FastAPI e OpenRouter. Experimente fazer perguntas, pedir códigos ou criar histórias cinematográficas.
+          </p>
+
+          <!-- Suggestion Cards Grid (Using Lumina Step aesthetic) -->
+          <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
+            
+            <div class="group p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-orange-500/40 transition-all duration-300 cursor-pointer backdrop-blur-md" onclick="usePrompt('Explique a teoria da relatividade geral de forma intuitiva com uma analogia.')" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 12px">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-[10px] font-bold text-black shadow-lg shadow-orange-500/20">01</div>
+                <span class="text-xs font-semibold tracking-widest uppercase text-orange-400">Conceito</span>
+              </div>
+              <p class="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">"Explique a teoria da relatividade de forma simples e intuitiva."</p>
+            </div>
+
+            <div class="group p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-orange-500/40 transition-all duration-300 cursor-pointer backdrop-blur-md" onclick="usePrompt('Escreva uma função em Python com FastAPI para upload e processamento de vídeos.')" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 12px">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-6 h-6 rounded-full bg-neutral-800 group-hover:bg-orange-500 flex items-center justify-center text-[10px] font-bold text-white group-hover:text-black transition-colors duration-300">02</div>
+                <span class="text-xs font-semibold tracking-widest uppercase text-neutral-400 group-hover:text-orange-400 transition-colors">Programação</span>
+              </div>
+              <p class="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">"Escreva uma rota FastAPI em Python para upload de vídeos."</p>
+            </div>
+
+            <div class="group p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-orange-500/40 transition-all duration-300 cursor-pointer backdrop-blur-md" onclick="usePrompt('Crie um roteiro cinematográfico curto de 30 segundos sobre exploração espacial no estilo sci-fi.')" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 12px">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-6 h-6 rounded-full bg-neutral-800 group-hover:bg-orange-500 flex items-center justify-center text-[10px] font-bold text-white group-hover:text-black transition-colors duration-300">03</div>
+                <span class="text-xs font-semibold tracking-widest uppercase text-neutral-400 group-hover:text-orange-400 transition-colors">Cinema & Roteiro</span>
+              </div>
+              <p class="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">"Crie um roteiro cinematográfico de 30 segundos sobre exploração espacial."</p>
+            </div>
+
+            <div class="group p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-orange-500/40 transition-all duration-300 cursor-pointer backdrop-blur-md" onclick="usePrompt('Quais são as 5 melhores práticas de UI/UX para criar aplicações dark mode modernas?')" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 12px">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-6 h-6 rounded-full bg-neutral-800 group-hover:bg-orange-500 flex items-center justify-center text-[10px] font-bold text-white group-hover:text-black transition-colors duration-300">04</div>
+                <span class="text-xs font-semibold tracking-widest uppercase text-neutral-400 group-hover:text-orange-400 transition-colors">Design</span>
+              </div>
+              <p class="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">"5 melhores práticas de UI/UX para interfaces dark mode modernas."</p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div id="messages-list" class="max-w-3xl mx-auto space-y-6 pb-2">
+          <!-- Injected dynamically via JavaScript -->
+        </div>
+
+        <!-- Thinking Indicator (Hidden by default) -->
+        <div id="thinking-indicator" class="max-w-3xl mx-auto hidden animate-fade-slide">
+          <div class="flex items-start gap-3.5">
+            <!-- Lumina Avatar -->
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
+              <div class="w-2.5 h-2.5 bg-black rounded-full animate-ping"></div>
+            </div>
+            <!-- Shimmer Bubble -->
+            <div class="p-4 rounded-2xl rounded-tl-sm bg-[#111] border border-white/10 text-neutral-300 flex items-center gap-3 thinking-shimmer" style="--border-gradient: linear-gradient(180deg, rgba(249, 115, 22, 0.4), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
+              <div class="flex gap-1.5 items-center">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 rounded-full bg-orange-400 animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce" style="animation-delay: 0.4s"></span>
+              </div>
+              <span class="text-xs font-medium text-neutral-400 tracking-wide">Lumina está processando a resposta...</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== FLOATING INPUT BAR ==================== -->
+      <div class="relative z-20 px-4 md:px-8 pb-5 pt-2 bg-gradient-to-t from-[#050505] via-[#050505]/95 to-transparent">
+        <div class="max-w-3xl mx-auto">
+          
+          <!-- Input Card with Lumina Border Gradient -->
+          <div class="relative rounded-2xl bg-neutral-950/90 border border-white/10 shadow-2xl backdrop-blur-xl transition-all duration-300 focus-within:border-orange-500/50 focus-within:shadow-[0_0_30px_rgba(249,115,22,0.2)]" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02)); --border-radius-before: 16px;">
+            <form id="chat-form" onsubmit="handleSendMessage(event)" class="flex flex-col p-3">
+              
+              <!-- Textarea -->
+              <textarea
+                id="user-input"
+                rows="1"
+                placeholder="Envie uma mensagem para a Lumina AI..."
+                class="w-full bg-transparent border-0 text-white placeholder-neutral-500 text-sm md:text-base focus:ring-0 focus:outline-none resize-none px-2 py-1 max-h-48 overflow-y-auto leading-relaxed"
+                oninput="autoResizeTextarea(this)"
+                onkeydown="handleKeyDown(event)"
+              ></textarea>
+
+              <!-- Controls row -->
+              <div class="flex items-center justify-between pt-2 px-1 mt-1 border-t border-white/5">
+                <!-- Helper text -->
+                <div class="flex items-center gap-2 text-[11px] text-neutral-500">
+                  <span class="hidden sm:inline">Pressione <kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-neutral-400 font-mono text-[10px]">Enter</kbd> para enviar</span>
+                  <span class="hidden sm:inline">•</span>
+                  <span class="hidden sm:inline"><kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-neutral-400 font-mono text-[10px]">Shift + Enter</kbd> nova linha</span>
+                </div>
+
+                <!-- Send Button with Particle Animation -->
+                <button
+                  type="submit"
+                  id="btn-send"
+                  class="button-custom py-2 px-5 min-h-[38px] text-xs"
+                >
+                  <div class="points_wrapper">
+                    <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+                  </div>
+                  <span class="inner text-xs font-semibold">
+                    <span>Enviar</span>
+                    <i data-lucide="arrow-up" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+                  </span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Bottom disclaimer -->
+          <div class="text-center mt-2">
+            <span class="text-[11px] text-neutral-500">
+              Lumina AI pode produzir informações imprecisas. Conectado ao endpoint <code class="text-orange-400/80 font-mono">/send_message</code>.
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+  </div> <!-- /#app-screen -->
+
+  <!-- ==================== SETTINGS MODAL ==================== -->
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-neutral-950 border border-white/10 p-6 shadow-2xl relative animate-fade-slide" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
+      
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base font-semibold text-white">Configurações de Conexão</h3>
+        </div>
+        <button onclick="toggleSettingsModal()" class="text-neutral-400 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div>
+          <label class="block text-xs font-medium text-neutral-400 mb-1.5 uppercase tracking-wider">URL do Backend</label>
+          <input
+            type="text"
+            id="setting-backend-url"
+            value="http://127.0.0.1:8001"
+            class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-orange-500 transition-colors"
+          />
+          <p class="text-[11px] text-neutral-500 mt-1">Endereço da API FastAPI rodando localmente.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-400 mb-1.5 uppercase tracking-wider">Status do Endpoint</label>
+          <div class="p-3 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-between">
+            <span class="text-xs text-neutral-300 font-mono">GET /</span>
+            <button onclick="checkBackendHealth()" class="text-xs text-orange-400 hover:underline">Testar Agora</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button onclick="toggleSettingsModal()" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-medium transition-colors">
+          Fechar
+        </button>
+        <button onclick="saveSettings()" class="button-custom py-1.5 px-4 text-xs font-semibold">
+          <span class="inner text-xs">Salvar Configurações</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // State management
+    const state = {
+      backendUrl: localStorage.getItem('lumina_backend_url') || 'http://127.0.0.1:8001',
+      authToken: localStorage.getItem('lumina_auth_token') || null,
+      currentUser: null,
+      authMode: 'login', // 'login' ou 'register'
+      activeSessionId: null,
+      sessions: [],
+      isThinking: false,
+      isConnected: false
+    };
+
+    // DOM Elements
+    const elements = {
+      messagesContainer: document.getElementById('messages-container'),
+      messagesList: document.getElementById('messages-list'),
+      welcomeHero: document.getElementById('welcome-hero'),
+      userInput: document.getElementById('user-input'),
+      btnSend: document.getElementById('btn-send'),
+      thinkingIndicator: document.getElementById('thinking-indicator'),
+      chatHistoryList: document.getElementById('chat-history-list'),
+      statusDot: document.getElementById('status-indicator-dot'),
+      statusText: document.getElementById('status-indicator-text'),
+      statusPill: document.getElementById('backend-status-pill'),
+      sidebar: document.getElementById('sidebar'),
+      sidebarBackdrop: document.getElementById('sidebar-backdrop'),
+      btnToggleSidebar: document.getElementById('btn-toggle-sidebar'),
+      settingsModal: document.getElementById('settings-modal'),
+      settingBackendUrl: document.getElementById('setting-backend-url'),
+      // Screens
+      authScreen: document.getElementById('auth-screen'),
+      appScreen: document.getElementById('app-screen'),
+      authStatusDot: document.getElementById('auth-status-dot'),
+      authStatusText: document.getElementById('auth-status-text'),
+      // Auth elements
+      userProfilePill: document.getElementById('user-profile-pill'),
+      userDropdownMenu: document.getElementById('user-dropdown-menu'),
+      userAvatarChar: document.getElementById('user-avatar-char'),
+      userDisplayUsername: document.getElementById('user-display-username'),
+      userDropdownEmail: document.getElementById('user-dropdown-email'),
+      authForm: document.getElementById('auth-form'),
+      authSubtitle: document.getElementById('auth-screen-subtitle'),
+      tabLogin: document.getElementById('tab-login'),
+      tabRegister: document.getElementById('tab-register'),
+      labelIdentifier: document.getElementById('label-identifier'),
+      authIdentifier: document.getElementById('auth-identifier'),
+      groupEmail: document.getElementById('group-email'),
+      authEmail: document.getElementById('auth-email'),
+      authPassword: document.getElementById('auth-password'),
+      btnAuthSubmit: document.getElementById('btn-auth-submit'),
+      textAuthSubmit: document.getElementById('text-auth-submit'),
+      authAlert: document.getElementById('auth-alert'),
+    };
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadSessions();
+      checkBackendHealth();
+      checkAuthStatus();
+      setInterval(checkBackendHealth, 8000);
+
+      // Event listener for sidebar toggle
+      if (elements.btnToggleSidebar) {
+        elements.btnToggleSidebar.addEventListener('click', toggleSidebar);
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (elements.userProfilePill && !elements.userProfilePill.contains(e.target)) {
+          elements.userDropdownMenu.classList.add('hidden');
+        }
+      });
+    });
+
+    // Check Backend Health
+    async function checkBackendHealth() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+        const res = await fetch(`${state.backendUrl}/`, {
+          method: 'GET',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          state.isConnected = true;
+          elements.statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
+          elements.statusText.textContent = 'API Conectada';
+          elements.statusText.className = 'text-emerald-400 font-medium hidden sm:inline text-xs';
+          elements.statusPill.classList.remove('border-red-500/30', 'bg-red-500/10');
+          elements.statusPill.classList.add('border-emerald-500/30', 'bg-emerald-500/5');
+
+          if (elements.authStatusDot) {
+            elements.authStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]';
+            elements.authStatusText.textContent = 'Backend Conectado (Porta 8001)';
+            elements.authStatusText.className = 'text-emerald-400 font-medium';
+          }
+        } else {
+          throw new Error('Status ' + res.status);
+        }
+      } catch (err) {
+        state.isConnected = false;
+        elements.statusDot.className = 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse';
+        elements.statusText.textContent = 'Backend Offline';
+        elements.statusText.className = 'text-rose-400 font-medium hidden sm:inline text-xs';
+        elements.statusPill.classList.remove('border-emerald-500/30', 'bg-emerald-500/5');
+        elements.statusPill.classList.add('border-red-500/30', 'bg-red-500/10');
+
+        if (elements.authStatusDot) {
+          elements.authStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)] animate-pulse';
+          elements.authStatusText.textContent = 'Backend Offline (:8001)';
+          elements.authStatusText.className = 'text-rose-400 font-medium';
+        }
+      }
+    }
+
+    // Sessions & Storage
+    function loadSessions() {
+      const stored = localStorage.getItem('lumina_chat_sessions');
+      if (stored) {
+        try {
+          state.sessions = JSON.parse(stored);
+        } catch(e) {
+          state.sessions = [];
+        }
+      }
+
+      if (!state.sessions || state.sessions.length === 0) {
+        startNewChat(false);
+      } else {
+        const lastActive = localStorage.getItem('lumina_active_session_id');
+        const sessionToLoad = state.sessions.find(s => s.id === lastActive) || state.sessions[0];
+        selectSession(sessionToLoad.id);
+      }
+
+      renderSidebarSessions();
+    }
+
+    function saveSessions() {
+      localStorage.setItem('lumina_chat_sessions', JSON.stringify(state.sessions));
+      if (state.activeSessionId) {
+        localStorage.setItem('lumina_active_session_id', state.activeSessionId);
+      }
+      renderSidebarSessions();
+    }
+
+    function startNewChat(shouldRender = true) {
+      const newSession = {
+        id: 'session_' + Date.now(),
+        title: 'Nova Conversa',
+        createdAt: new Date().toISOString(),
+        messages: []
+      };
+
+      state.sessions.unshift(newSession);
+      state.activeSessionId = newSession.id;
+      saveSessions();
+
+      if (shouldRender) {
+        renderCurrentSession();
+      }
+
+      closeSidebar();
+      if (elements.userInput) {
+        elements.userInput.focus();
+      }
+    }
+
+    function selectSession(id) {
+      state.activeSessionId = id;
+      localStorage.setItem('lumina_active_session_id', id);
+      renderSidebarSessions();
+      renderCurrentSession();
+      closeSidebar();
+    }
+
+    function deleteSession(id, event) {
+      if (event) event.stopPropagation();
+      state.sessions = state.sessions.filter(s => s.id !== id);
+
+      if (state.sessions.length === 0) {
+        startNewChat();
+      } else if (state.activeSessionId === id) {
+        selectSession(state.sessions[0].id);
+      } else {
+        saveSessions();
+      }
+    }
+
+    function clearAllChats() {
+      if (!confirm('Deseja realmente apagar todo o histórico de conversas?')) return;
+      state.sessions = [];
+      localStorage.removeItem('lumina_chat_sessions');
+      startNewChat();
+    }
+
+    function getActiveSession() {
+      return state.sessions.find(s => s.id === state.activeSessionId);
+    }
+
+    // Rendering Messages
+    function renderCurrentSession() {
+      const session = getActiveSession();
+      if (!session) return;
+
+      elements.messagesList.innerHTML = '';
+
+      if (session.messages.length === 0) {
+        elements.welcomeHero.classList.remove('hidden');
+      } else {
+        elements.welcomeHero.classList.add('hidden');
+        session.messages.forEach(msg => {
+          appendMessageToDOM(msg.role, msg.content, false);
+        });
+        scrollToBottom();
+      }
+
+      lucide.createIcons();
+    }
+
+    function renderSidebarSessions() {
+      elements.chatHistoryList.innerHTML = '';
+
+      state.sessions.forEach(session => {
+        const isActive = session.id === state.activeSessionId;
+        const div = document.createElement('div');
+        div.className = `group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer text-xs font-medium transition-all duration-200 ${
+          isActive 
+            ? 'bg-white/10 text-white border border-white/10 shadow-lg shadow-black/40' 
+            : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+        }`;
+        div.onclick = () => selectSession(session.id);
+
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5 truncate flex-1 mr-2">
+            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]' : 'bg-neutral-600'}"></span>
+            <span class="truncate">${escapeHtml(session.title)}</span>
+          </div>
+          <button onclick="deleteSession('${session.id}', event)" class="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-opacity" title="Excluir conversa">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+
+        elements.chatHistoryList.appendChild(div);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Append Message to DOM
+    function appendMessageToDOM(role, text, animate = true) {
+      const isUser = role === 'user';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex gap-3.5 items-start ${isUser ? 'justify-end' : 'justify-start'} ${animate ? 'animate-fade-slide' : ''}`;
+
+      if (isUser) {
+        // User message
+        msgDiv.innerHTML = `
+          <div class="flex flex-col items-end max-w-[85%] sm:max-w-[75%]">
+            <div class="p-3.5 px-4 rounded-2xl rounded-tr-sm bg-gradient-to-b from-white/10 to-white/5 border border-white/10 text-white text-sm leading-relaxed backdrop-blur-md shadow-xl" style="--border-gradient: linear-gradient(180deg, rgba(249, 115, 22, 0.4), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
+              ${escapeHtml(text).replace(/\n/g, '<br>')}
+            </div>
+            <span class="text-[10px] font-mono text-neutral-500 mt-1 px-1">Você</span>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center flex-shrink-0 text-xs font-semibold text-neutral-300">
+            U
+          </div>
+        `;
+      } else {
+        // Assistant message (Lumina)
+        const parsedHtml = parseMarkdown(text);
+        const uniqueId = 'bot_msg_' + Math.random().toString(36).substring(2, 9);
+
+        msgDiv.innerHTML = `
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
+            <div class="w-2.5 h-2.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+          </div>
+          <div class="flex flex-col items-start max-w-[88%] sm:max-w-[80%] flex-1">
+            <div class="w-full p-4 rounded-2xl rounded-tl-sm bg-[#0d0d0d] border border-white/10 text-white shadow-2xl backdrop-blur-md relative group" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02)); --border-radius-before: 16px;">
+              <div class="chat-prose" id="${uniqueId}">
+                ${parsedHtml}
+              </div>
+              
+              <!-- Message action toolbar -->
+              <div class="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-neutral-500">
+                <div class="flex items-center gap-2">
+                  <span class="text-orange-400 font-medium">Lumina AI</span>
+                  <span>•</span>
+                  <span class="font-mono text-[10px]">liquid/lfm-2.5-2.6b:free</span>
+                </div>
+                <button onclick="copyMessageText('${uniqueId}', this)" class="flex items-center gap-1 hover:text-white transition-colors" title="Copiar resposta">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>Copiar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      elements.messagesList.appendChild(msgDiv);
+      elements.welcomeHero.classList.add('hidden');
+      scrollToBottom();
+      lucide.createIcons();
+    }
+
+    // Sending Message
+    async function handleSendMessage(e) {
+      if (e) e.preventDefault();
+      const text = elements.userInput.value.trim();
+      if (!text || state.isThinking) return;
+
+      const session = getActiveSession();
+      if (!session) return;
+
+      // Update session title on first message
+      if (session.messages.length === 0) {
+        session.title = text.slice(0, 30) + (text.length > 30 ? '...' : '');
+      }
+
+      // Add user message to session
+      session.messages.push({ role: 'user', content: text, timestamp: Date.now() });
+      appendMessageToDOM('user', text, true);
+
+      // Clear input and reset height
+      elements.userInput.value = '';
+      autoResizeTextarea(elements.userInput);
+
+      // Trigger Thinking state
+      setThinking(true);
+      saveSessions();
+
+      try {
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        if (state.authToken) {
+          headers['Authorization'] = `Bearer ${state.authToken}`;
+        }
+
+        const response = await fetch(`${state.backendUrl}/send_message`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({ message: text, session_id: session.id })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Erro ao consultar a API');
+        }
+
+        const reply = data.response || '(Sem resposta do assistente)';
+        session.messages.push({ role: 'assistant', content: reply, timestamp: Date.now() });
+        appendMessageToDOM('assistant', reply, true);
+        saveSessions();
+      } catch (err) {
+        console.error('Erro na requisição:', err);
+        const errorMsg = `⚠️ **Falha na comunicação com o backend:** ${err.message}\n\nCertifique-se de que o servidor FastAPI está ativo na porta \`8001\` executando:\n\`\`\`powershell\ncd backend\nuv run python main.py\n\`\`\``;
+        session.messages.push({ role: 'assistant', content: errorMsg, timestamp: Date.now() });
+        appendMessageToDOM('assistant', errorMsg, true);
+        saveSessions();
+      } finally {
+        setThinking(false);
+      }
+    }
+
+    function setThinking(val) {
+      state.isThinking = val;
+      if (val) {
+        elements.thinkingIndicator.classList.remove('hidden');
+        elements.btnSend.setAttribute('disabled', 'true');
+      } else {
+        elements.thinkingIndicator.classList.add('hidden');
+        elements.btnSend.removeAttribute('disabled');
+      }
+      scrollToBottom();
+    }
+
+    function usePrompt(promptText) {
+      elements.userInput.value = promptText;
+      autoResizeTextarea(elements.userInput);
+      elements.userInput.focus();
+      handleSendMessage();
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleSendMessage();
+      }
+    }
+
+    function autoResizeTextarea(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
+    }
+
+    function scrollToBottom() {
+      setTimeout(() => {
+        elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+      }, 50);
+    }
+
+    // Markdown Parser with Code Block Beautifier
+    function parseMarkdown(md) {
+      if (!md) return '';
+
+      // Escape HTML tags to prevent XSS
+      let text = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      // Code blocks with syntax copy button
+      text = text.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, function(match, lang, code) {
+        const langDisplay = lang || 'code';
+        const codeId = 'code_' + Math.random().toString(36).substring(2, 9);
+        return `
+          <div class="relative my-3 rounded-lg overflow-hidden border border-white/10 bg-[#080808]">
+            <div class="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b border-white/5 text-[11px] font-mono text-neutral-400">
+              <span class="text-orange-400 uppercase font-semibold">${langDisplay}</span>
+              <button onclick="copyCodeBlock('${codeId}', this)" class="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>Copiar Código</span>
+              </button>
+            </div>
+            <pre class="!m-0 !rounded-none !border-0"><code id="${codeId}">${code.trim()}</code></pre>
+          </div>
+        `;
+      });
+
+      // Inline code `code`
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Bold **text** or __text__
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+      // Italic *text* or _text_
+      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      text = text.replace(/_(.*?)_/g, '<em>$1</em>');
+
+      // Headers #, ##, ###
+      text = text.replace(/^### (.*$)/gim, '<h3 class="text-base font-semibold text-white mt-3 mb-1">$1</h3>');
+      text = text.replace(/^## (.*$)/gim, '<h2 class="text-lg font-semibold text-white mt-4 mb-1">$1</h2>');
+      text = text.replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-white mt-4 mb-2">$1</h1>');
+
+      // Unordered lists
+      text = text.replace(/^\s*-\s+(.*$)/gim, '<li class="ml-4 list-disc text-neutral-300">$1</li>');
+
+      // Numbered lists
+      text = text.replace(/^\s*(\d+)\.\s+(.*$)/gim, '<li class="ml-4 list-decimal text-neutral-300">$2</li>');
+
+      // Paragraph breaks
+      const paragraphs = text.split(/\n\n+/);
+      text = paragraphs.map(p => {
+        if (p.startsWith('<div') || p.startsWith('<h') || p.startsWith('<li')) {
+          return p;
+        }
+        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+      }).join('');
+
+      return text;
+    }
+
+    // Helper functions
+    function escapeHtml(str) {
+      return (str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function copyCodeBlock(codeId, btn) {
+      const codeEl = document.getElementById(codeId);
+      if (!codeEl) return;
+
+      navigator.clipboard.writeText(codeEl.innerText).then(() => {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span class="text-emerald-400 font-semibold">Copiado!</span>`;
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyMessageText(containerId, btn) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      navigator.clipboard.writeText(container.innerText).then(() => {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-emerald-400 font-semibold">Copiado!</span>`;
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    // Sidebar & UI interactions
+    function toggleSidebar() {
+      const isHidden = elements.sidebar.classList.contains('-translate-x-full');
+      if (isHidden) {
+        elements.sidebar.classList.remove('-translate-x-full');
+        elements.sidebarBackdrop.classList.remove('hidden');
+      } else {
+        closeSidebar();
+      }
+    }
+
+    function closeSidebar() {
+      elements.sidebar.classList.add('-translate-x-full');
+      elements.sidebarBackdrop.classList.add('hidden');
+    }
+
+    // Settings Modal
+    function toggleSettingsModal() {
+      elements.settingsModal.classList.toggle('hidden');
+      if (!elements.settingsModal.classList.contains('hidden')) {
+        elements.settingBackendUrl.value = state.backendUrl;
+      }
+    }
+
+    function saveSettings() {
+      const url = elements.settingBackendUrl.value.trim().replace(/\/$/, '');
+      if (url) {
+        state.backendUrl = url;
+        localStorage.setItem('lumina_backend_url', url);
+        checkBackendHealth();
+        toggleSettingsModal();
+      }
+    }
+
+    // ==================== AUTHENTICATION LOGIC ====================
+    function switchAuthTab(mode) {
+      state.authMode = mode;
+      elements.authAlert.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border';
+      elements.authAlert.innerHTML = '';
+
+      if (mode === 'login') {
+        elements.authSubtitle.textContent = 'Acesse sua conta para conversar com a IA e salvar seu histórico no banco';
+        elements.tabLogin.className = 'flex-1 py-1.5 rounded-lg text-white bg-white/10 shadow-sm transition-all';
+        elements.tabRegister.className = 'flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white transition-all';
+        elements.labelIdentifier.textContent = 'Usuário ou E-mail';
+        elements.authIdentifier.placeholder = 'Digite seu usuário ou e-mail';
+        elements.groupEmail.classList.add('hidden');
+        elements.authEmail.removeAttribute('required');
+        elements.textAuthSubmit.textContent = 'Entrar na Plataforma';
+      } else {
+        elements.authSubtitle.textContent = 'Cadastre-se para ter seu histórico protegido no banco local';
+        elements.tabRegister.className = 'flex-1 py-1.5 rounded-lg text-white bg-white/10 shadow-sm transition-all';
+        elements.tabLogin.className = 'flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white transition-all';
+        elements.labelIdentifier.textContent = 'Nome de Usuário';
+        elements.authIdentifier.placeholder = 'ex: seu_nome';
+        elements.groupEmail.classList.remove('hidden');
+        elements.authEmail.setAttribute('required', 'true');
+        elements.textAuthSubmit.textContent = 'Concluir Cadastro';
+      }
+    }
+
+    async function handleAuthSubmit(event) {
+      event.preventDefault();
+      const identifier = elements.authIdentifier.value.trim();
+      const password = elements.authPassword.value;
+      const isLogin = state.authMode === 'login';
+
+      elements.btnAuthSubmit.setAttribute('disabled', 'true');
+      elements.textAuthSubmit.textContent = isLogin ? 'Entrando...' : 'Criando conta...';
+
+      try {
+        let endpoint = `${state.backendUrl}/auth/login`;
+        let bodyData = {};
+
+        if (isLogin) {
+          bodyData = {
+            username_or_email: identifier,
+            password: password
+          };
+        } else {
+          endpoint = `${state.backendUrl}/auth/register`;
+          const email = elements.authEmail.value.trim();
+          bodyData = {
+            username: identifier,
+            email: email,
+            password: password
+          };
+        }
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Erro na autenticação');
+        }
+
+        // Sucesso
+        state.authToken = data.access_token;
+        state.currentUser = data.user;
+        localStorage.setItem('lumina_auth_token', data.access_token);
+        localStorage.setItem('lumina_user', JSON.stringify(data.user));
+
+        updateAuthUI();
+
+      } catch (err) {
+        elements.authAlert.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-rose-500/10 border-rose-500/30 text-rose-300';
+        elements.authAlert.textContent = err.message || 'Falha ao autenticar. Verifique seus dados.';
+      } finally {
+        elements.btnAuthSubmit.removeAttribute('disabled');
+        elements.textAuthSubmit.textContent = isLogin ? 'Entrar na Plataforma' : 'Concluir Cadastro';
+      }
+    }
+
+    async function checkAuthStatus() {
+      if (!state.authToken) {
+        updateAuthUI();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${state.backendUrl}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+
+        if (response.ok) {
+          const user = await response.json();
+          state.currentUser = user;
+          localStorage.setItem('lumina_user', JSON.stringify(user));
+        } else {
+          // Token expirado ou inválido
+          handleLogout(false);
+        }
+      } catch (e) {
+        // Se backend estiver temporariamente inacessível, recupera do cache se houver
+        const cached = localStorage.getItem('lumina_user');
+        if (cached) {
+          try { state.currentUser = JSON.parse(cached); } catch(err){}
+        }
+      } finally {
+        updateAuthUI();
+      }
+    }
+
+    function updateAuthUI() {
+      if (state.currentUser && state.authToken) {
+        // Usuário autenticado: oculta tela de login e revela a tela do chat
+        if (elements.authScreen) elements.authScreen.classList.add('hidden');
+        if (elements.appScreen) elements.appScreen.classList.remove('hidden');
+
+        if (elements.userProfilePill) elements.userProfilePill.classList.remove('hidden');
+        if (elements.userDisplayUsername) elements.userDisplayUsername.textContent = state.currentUser.username;
+        if (elements.userDropdownEmail) elements.userDropdownEmail.textContent = state.currentUser.email;
+        if (elements.userAvatarChar) elements.userAvatarChar.textContent = (state.currentUser.username[0] || 'U').toUpperCase();
+
+        if (elements.userInput) {
+          setTimeout(() => elements.userInput.focus(), 100);
+        }
+      } else {
+        // Usuário não autenticado: exibe a tela de login obrigatória e oculta o chat
+        if (elements.authScreen) elements.authScreen.classList.remove('hidden');
+        if (elements.appScreen) elements.appScreen.classList.add('hidden');
+        if (elements.userDropdownMenu) elements.userDropdownMenu.classList.add('hidden');
+
+        if (elements.authIdentifier) {
+          setTimeout(() => elements.authIdentifier.focus(), 100);
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function toggleUserDropdown() {
+      elements.userDropdownMenu.classList.toggle('hidden');
+    }
+
+    function handleLogout(notify = true) {
+      state.authToken = null;
+      state.currentUser = null;
+      localStorage.removeItem('lumina_auth_token');
+      localStorage.removeItem('lumina_user');
+      elements.authForm.reset();
+      elements.authAlert.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border';
+      updateAuthUI();
+    }
+  </script>
+</body>
+</html>
