@@ -1,0 +1,8 @@
+fastapi>=0.141.1
+uvicorn>=0.53.0
+sqlalchemy>=2.0.54
+psycopg2-binary>=2.9.9
+bcrypt>=5.0.0
+pyjwt>=2.14.0
+requests>=2.34.2
+python-dotenv>=1.2.3

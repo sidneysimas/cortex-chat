@@ -15,6 +15,10 @@ load_dotenv()
 DEFAULT_SQLITE_PATH = Path(__file__).resolve().parent / "lumina.db"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_PATH}")
 
+# Compatibilidade com plataformas em nuvem (Render/Railway/Heroku/Supabase)
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Parâmetros de conexão específicos para SQLite
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):

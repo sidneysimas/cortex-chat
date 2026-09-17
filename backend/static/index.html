@@ -305,7 +305,7 @@
   </div>
 
   <!-- ==================== AUTH SCREEN (LOGIN / CADASTRO OBRIGATÓRIO) ==================== -->
-  <div id="auth-screen" class="relative z-20 flex flex-col items-center justify-center min-h-screen w-full px-4 py-8 overflow-y-auto">
+  <div id="auth-screen" class="relative z-20 flex flex-col items-center justify-center min-h-screen w-full px-4 py-8 overflow-y-auto" style="display: flex;">
     
     <!-- Central Auth Card (Lumina Design System) -->
     <div class="w-full max-w-sm rounded-2xl bg-neutral-950/90 backdrop-blur-2xl border border-white/10 p-7 shadow-2xl relative animate-fade-slide" style="--border-gradient: linear-gradient(180deg, rgba(249, 115, 22, 0.45), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
@@ -366,6 +366,13 @@
           />
         </div>
 
+        <div id="group-remember" class="flex items-center justify-between text-[11px] text-neutral-400 pt-0.5">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="auth-remember-me" checked class="w-3.5 h-3.5 rounded bg-white/10 border-white/20 text-orange-500 accent-orange-500 cursor-pointer">
+            <span>Manter conectado neste navegador</span>
+          </label>
+        </div>
+
         <button
           type="submit"
           id="btn-auth-submit"
@@ -392,7 +399,7 @@
   </div>
 
   <!-- ==================== APP SCREEN (CHAT WORKSPACE - PROTEGIDO) ==================== -->
-  <div id="app-screen" class="relative z-10 flex flex-col h-full w-full hidden">
+  <div id="app-screen" class="relative z-10 flex flex-col h-full w-full hidden" style="display: none;">
 
     <!-- ==================== TOP NAVIGATION HEADER ==================== -->
     <header class="relative z-20 flex items-center justify-between px-5 md:px-8 py-3.5 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
@@ -713,7 +720,7 @@
 
     const state = {
       backendUrl: localStorage.getItem('lumina_backend_url') || defaultOrigin,
-      authToken: localStorage.getItem('lumina_auth_token') || null,
+      authToken: localStorage.getItem('lumina_auth_token') || sessionStorage.getItem('lumina_auth_token') || null,
       currentUser: null,
       authMode: 'login', // 'login' ou 'register'
       activeSessionId: null,
@@ -759,6 +766,7 @@
       groupEmail: document.getElementById('group-email'),
       authEmail: document.getElementById('auth-email'),
       authPassword: document.getElementById('auth-password'),
+      authRememberMe: document.getElementById('auth-remember-me'),
       btnAuthSubmit: document.getElementById('btn-auth-submit'),
       textAuthSubmit: document.getElementById('text-auth-submit'),
       authAlert: document.getElementById('auth-alert'),
@@ -766,6 +774,8 @@
 
     // Initialize application
     document.addEventListener('DOMContentLoaded', () => {
+      // Aplica estado de visibilidade imediatamente
+      updateAuthUI();
       lucide.createIcons();
       loadSessions();
       checkBackendHealth();
@@ -1062,6 +1072,10 @@
         const data = await response.json();
 
         if (!response.ok) {
+          if (response.status === 401) {
+            handleLogout(false);
+            throw new Error('Sua sessão expirou ou é inválida. Por favor, faça login novamente.');
+          }
           throw new Error(data.detail || 'Erro ao consultar a API');
         }
 
@@ -1317,11 +1331,22 @@
           throw new Error(data.detail || 'Erro na autenticação');
         }
 
-        // Sucesso
+        // Sucesso na autenticação
         state.authToken = data.access_token;
         state.currentUser = data.user;
-        localStorage.setItem('lumina_auth_token', data.access_token);
-        localStorage.setItem('lumina_user', JSON.stringify(data.user));
+
+        const rememberMe = elements.authRememberMe ? elements.authRememberMe.checked : true;
+        if (rememberMe) {
+          localStorage.setItem('lumina_auth_token', data.access_token);
+          localStorage.setItem('lumina_user', JSON.stringify(data.user));
+          sessionStorage.removeItem('lumina_auth_token');
+          sessionStorage.removeItem('lumina_user');
+        } else {
+          sessionStorage.setItem('lumina_auth_token', data.access_token);
+          sessionStorage.setItem('lumina_user', JSON.stringify(data.user));
+          localStorage.removeItem('lumina_auth_token');
+          localStorage.removeItem('lumina_user');
+        }
 
         updateAuthUI();
 
@@ -1335,8 +1360,9 @@
     }
 
     async function checkAuthStatus() {
+      // Se não há token salvo nem no local nem na sessão, garante logout imediato
       if (!state.authToken) {
-        updateAuthUI();
+        handleLogout(false);
         return;
       }
 
@@ -1348,27 +1374,35 @@
         if (response.ok) {
           const user = await response.json();
           state.currentUser = user;
-          localStorage.setItem('lumina_user', JSON.stringify(user));
+          // Atualiza dados do usuário onde o token estiver salvo
+          if (localStorage.getItem('lumina_auth_token')) {
+            localStorage.setItem('lumina_user', JSON.stringify(user));
+          } else {
+            sessionStorage.setItem('lumina_user', JSON.stringify(user));
+          }
+          updateAuthUI();
         } else {
-          // Token expirado ou inválido
+          // Token inválido ou expirado no servidor -> desloga imediatamente
           handleLogout(false);
         }
       } catch (e) {
-        // Se backend estiver temporariamente inacessível, recupera do cache se houver
-        const cached = localStorage.getItem('lumina_user');
-        if (cached) {
-          try { state.currentUser = JSON.parse(cached); } catch(err){}
-        }
-      } finally {
-        updateAuthUI();
+        // Se a API estiver offline ou der erro de rede, NUNCA autentica via cache offline!
+        console.warn('Não foi possível validar credenciais com o backend:', e);
+        handleLogout(false);
       }
     }
 
     function updateAuthUI() {
       if (state.currentUser && state.authToken) {
-        // Usuário autenticado: oculta tela de login e revela a tela do chat
-        if (elements.authScreen) elements.authScreen.classList.add('hidden');
-        if (elements.appScreen) elements.appScreen.classList.remove('hidden');
+        // Usuário autenticado: oculta tela de login e revela a tela do chat com display explícito
+        if (elements.authScreen) {
+          elements.authScreen.classList.add('hidden');
+          elements.authScreen.style.display = 'none';
+        }
+        if (elements.appScreen) {
+          elements.appScreen.classList.remove('hidden');
+          elements.appScreen.style.display = 'flex';
+        }
 
         if (elements.userProfilePill) elements.userProfilePill.classList.remove('hidden');
         if (elements.userDisplayUsername) elements.userDisplayUsername.textContent = state.currentUser.username;
@@ -1379,9 +1413,16 @@
           setTimeout(() => elements.userInput.focus(), 100);
         }
       } else {
-        // Usuário não autenticado: exibe a tela de login obrigatória e oculta o chat
-        if (elements.authScreen) elements.authScreen.classList.remove('hidden');
-        if (elements.appScreen) elements.appScreen.classList.add('hidden');
+        // Usuário NÃO autenticado: exibe obrigatoriamente a tela de login e oculta completamente o chat
+        if (elements.authScreen) {
+          elements.authScreen.classList.remove('hidden');
+          elements.authScreen.style.display = 'flex';
+        }
+        if (elements.appScreen) {
+          elements.appScreen.classList.add('hidden');
+          elements.appScreen.style.display = 'none';
+        }
+        if (elements.userProfilePill) elements.userProfilePill.classList.add('hidden');
         if (elements.userDropdownMenu) elements.userDropdownMenu.classList.add('hidden');
 
         if (elements.authIdentifier) {
@@ -1400,8 +1441,10 @@
       state.currentUser = null;
       localStorage.removeItem('lumina_auth_token');
       localStorage.removeItem('lumina_user');
-      elements.authForm.reset();
-      elements.authAlert.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border';
+      sessionStorage.removeItem('lumina_auth_token');
+      sessionStorage.removeItem('lumina_user');
+      if (elements.authForm) elements.authForm.reset();
+      if (elements.authAlert) elements.authAlert.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border';
       updateAuthUI();
     }
   </script>

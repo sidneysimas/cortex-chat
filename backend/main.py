@@ -261,4 +261,6 @@ if __name__ == "__main__":
     current_dir = str(Path(__file__).resolve().parent)
     if current_dir not in sys.path:
         sys.path.insert(0, current_dir)
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, app_dir=current_dir)
+    port = int(os.getenv("PORT", 8001))
+    reload = os.getenv("ENVIRONMENT", "development").lower() == "development"
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=reload, app_dir=current_dir)
