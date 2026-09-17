@@ -36,7 +36,7 @@ from auth import (
 # Cria as tabelas no banco de dados automaticamente caso não existam
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Lumina API — OpenRouter & Auth")
+app = FastAPI(title="Cortex API — OpenRouter & Auth")
 
 # Habilitar CORS para permitir conexão com frontend
 app.add_middleware(
@@ -106,7 +106,7 @@ class ChatMessageResponse(BaseModel):
 
 @app.get("/", response_class=FileResponse)
 def render_frontend():
-    """Renderiza a aplicação frontend Lumina Chat diretamente na raiz"""
+    """Renderiza a aplicação frontend Cortex Chat diretamente na raiz"""
     index_file = STATIC_DIR / "index.html"
     if not index_file.exists():
         raise HTTPException(status_code=404, detail="Frontend (static/index.html) não encontrado")
@@ -118,7 +118,7 @@ def api_health():
     """Endpoint de verificação de status da API e banco de dados"""
     return {
         "status": "ok",
-        "message": "Lumina API ativa",
+        "message": "Cortex API ativa",
         "database": "SQLite (Pronto para migrar para PostgreSQL em produção)",
         "model": MODEL
     }

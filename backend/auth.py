@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import User
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "lumina-super-secret-jwt-key-2026-production-ready")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cortex-super-secret-jwt-key-2026-production-ready")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
 

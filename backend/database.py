@@ -10,9 +10,11 @@ if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 load_dotenv()
 
-# Padrão: SQLite local em backend/lumina.db
+# Padrão: SQLite local em backend/cortex.db (ou lumina.db existente)
 # Para produção: basta mudar DATABASE_URL no .env para postgresql://...
-DEFAULT_SQLITE_PATH = Path(__file__).resolve().parent / "lumina.db"
+cortex_db = Path(__file__).resolve().parent / "cortex.db"
+lumina_db = Path(__file__).resolve().parent / "lumina.db"
+DEFAULT_SQLITE_PATH = lumina_db if lumina_db.exists() else cortex_db
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_PATH}")
 
 # Compatibilidade com plataformas em nuvem (Render/Railway/Heroku/Supabase)
