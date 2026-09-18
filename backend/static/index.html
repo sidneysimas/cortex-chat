@@ -334,12 +334,14 @@
       <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-xs leading-relaxed border"></div>
 
       <!-- Form -->
-      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3.5">
+      <form id="auth-form" method="POST" action="#" onsubmit="handleAuthSubmit(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-medium text-neutral-400 mb-1.5 uppercase tracking-wider" id="label-identifier">Usuário ou E-mail</label>
           <input
             type="text"
             id="auth-identifier"
+            name="username"
+            autocomplete="username"
             required
             placeholder="Digite seu usuário ou e-mail"
             class="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
@@ -351,6 +353,8 @@
           <input
             type="email"
             id="auth-email"
+            name="email"
+            autocomplete="email"
             placeholder="exemplo@cortex.ai"
             class="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
           />
@@ -361,6 +365,8 @@
           <input
             type="password"
             id="auth-password"
+            name="password"
+            autocomplete="current-password"
             required
             minlength="6"
             placeholder="Mínimo de 6 caracteres"
@@ -1287,15 +1293,17 @@
         elements.tabRegister.className = 'flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white transition-all';
         elements.labelIdentifier.textContent = 'Usuário ou E-mail';
         elements.authIdentifier.placeholder = 'Digite seu usuário ou e-mail';
+        elements.authPassword.setAttribute('autocomplete', 'current-password');
         elements.groupEmail.classList.add('hidden');
         elements.authEmail.removeAttribute('required');
         elements.textAuthSubmit.textContent = 'Entrar na Plataforma';
       } else {
-        elements.authSubtitle.textContent = 'Cadastre-se para ter seu histórico protegido no banco local';
+        elements.authSubtitle.textContent = 'Cadastre-se para ter seu histórico protegido no banco';
         elements.tabRegister.className = 'flex-1 py-1.5 rounded-lg text-white bg-white/10 shadow-sm transition-all';
         elements.tabLogin.className = 'flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white transition-all';
         elements.labelIdentifier.textContent = 'Nome de Usuário';
         elements.authIdentifier.placeholder = 'ex: seu_nome';
+        elements.authPassword.setAttribute('autocomplete', 'new-password');
         elements.groupEmail.classList.remove('hidden');
         elements.authEmail.setAttribute('required', 'true');
         elements.textAuthSubmit.textContent = 'Concluir Cadastro';
