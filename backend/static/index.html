@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cortex Chat — Inteligência Criativa</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png" />
 
   <!-- Google Fonts: Geist, Instrument Serif, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -312,8 +313,9 @@
       
       <!-- Brand Header -->
       <div class="flex flex-col items-center text-center mb-6">
-        <div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-12 h-12 rounded-full items-center justify-center shadow-[0_0_25px_rgba(249,115,22,0.5)] mb-3" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
-          <div class="w-3.5 h-3.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+        <div class="relative w-20 h-20 mb-2 flex items-center justify-center">
+          <div class="absolute inset-0 bg-orange-500/25 rounded-full blur-xl animate-glow"></div>
+          <img src="/static/cortex-logo.png" alt="Cortex Brain Logo" class="relative z-10 w-20 h-20 object-contain drop-shadow-[0_0_20px_rgba(249,115,22,0.65)]" />
         </div>
         <div class="flex items-baseline gap-2 mb-1">
           <h1 class="text-2xl font-bold tracking-tight text-white">Cortex</h1>
@@ -410,10 +412,11 @@
           <i data-lucide="menu" class="w-4 h-4"></i>
         </button>
 
-        <!-- Lumina Icon Dot Logo -->
+        <!-- Cortex Logo -->
         <div class="flex items-center gap-2.5 cursor-pointer" onclick="startNewChat()">
-          <div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-8 h-8 rounded-full items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.4)]" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
-            <div class="w-2.5 h-2.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+          <div class="relative w-9 h-9 flex items-center justify-center">
+            <div class="absolute inset-0 bg-orange-500/25 rounded-full blur-md"></div>
+            <img src="/static/cortex-logo.png" alt="Cortex Logo" class="relative z-10 w-9 h-9 object-contain drop-shadow-[0_0_12px_rgba(249,115,22,0.6)] transition-transform hover:scale-110" />
           </div>
           <div class="flex items-baseline gap-2">
             <span class="text-lg font-semibold tracking-tight text-white">Cortex</span>
@@ -517,8 +520,14 @@
       <div id="messages-container" class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6 scroll-smooth">
         
         <!-- Welcome Hero (shown when no messages yet) -->
-        <div id="welcome-hero" class="max-w-3xl mx-auto pt-8 pb-12 flex flex-col items-center text-center animate-fade-slide">
+        <div id="welcome-hero" class="max-w-3xl mx-auto pt-6 pb-12 flex flex-col items-center text-center animate-fade-slide">
           
+          <!-- Cortex Brain Hero Emblem -->
+          <div class="relative w-28 h-28 mb-5 flex items-center justify-center group cursor-pointer" onclick="startNewChat()">
+            <div class="absolute inset-0 bg-gradient-to-tr from-orange-500/30 to-amber-500/15 rounded-full blur-2xl animate-glow"></div>
+            <img src="/static/cortex-logo.png" alt="Cortex AI" class="relative z-10 w-28 h-28 object-contain drop-shadow-[0_0_30px_rgba(249,115,22,0.65)] transition-transform duration-500 group-hover:scale-105" />
+          </div>
+
           <!-- Badge -->
           <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-orange-400 text-xs font-semibold tracking-widest uppercase mb-6" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
             <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
@@ -583,9 +592,10 @@
         <!-- Thinking Indicator (Hidden by default) -->
         <div id="thinking-indicator" class="max-w-3xl mx-auto hidden animate-fade-slide">
           <div class="flex items-start gap-3.5">
-            <!-- Lumina Avatar -->
-            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
-              <div class="w-2.5 h-2.5 bg-black rounded-full animate-ping"></div>
+            <!-- Cortex Avatar -->
+            <div class="flex-shrink-0 relative w-8 h-8 flex items-center justify-center">
+              <div class="absolute inset-0 bg-orange-500/25 rounded-full blur-sm animate-pulse"></div>
+              <img src="/static/cortex-logo.png" alt="Cortex AI" class="relative z-10 w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.6)] animate-pulse" />
             </div>
             <!-- Shimmer Bubble -->
             <div class="p-4 rounded-2xl rounded-tl-sm bg-[#111] border border-white/10 text-neutral-300 flex items-center gap-3 thinking-shimmer" style="--border-gradient: linear-gradient(180deg, rgba(249, 115, 22, 0.4), rgba(255, 255, 255, 0.05)); --border-radius-before: 16px;">
@@ -992,13 +1002,14 @@
           </div>
         `;
       } else {
-        // Assistant message (Lumina)
+        // Assistant message (Cortex)
         const parsedHtml = parseMarkdown(text);
         const uniqueId = 'bot_msg_' + Math.random().toString(36).substring(2, 9);
 
         msgDiv.innerHTML = `
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
-            <div class="w-2.5 h-2.5 bg-black rounded-full" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+          <div class="flex-shrink-0 relative w-8 h-8 flex items-center justify-center">
+            <div class="absolute inset-0 bg-orange-500/20 rounded-full blur-sm"></div>
+            <img src="/static/cortex-logo.png" alt="Cortex AI" class="relative z-10 w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.55)]" />
           </div>
           <div class="flex flex-col items-start max-w-[88%] sm:max-w-[80%] flex-1">
             <div class="w-full p-4 rounded-2xl rounded-tl-sm bg-[#0d0d0d] border border-white/10 text-white shadow-2xl backdrop-blur-md relative group" style="--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02)); --border-radius-before: 16px;">
